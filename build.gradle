@@ -131,6 +131,6 @@ project(":core") {
         api "de.tomgrill.gdxfacebook:gdx-facebook-core:1.4.1"
         api "com.kotcrab.vis:vis-ui:1.3.0"
         api "net.dermetfan.libgdx-utils:libgdx-utils:0.13.4"
-        
+        api "io.socket:socket.io-client:2.0.0"
     }
 }

@@ -5,14 +5,18 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.ScreenUtils;
 
+import io.socket.client.IO;
+import io.socket.client.Socket;
+
 public class BattleArena extends ApplicationAdapter {
 	SpriteBatch batch;
 	Texture img;
-	
+	private Socket socket;
 	@Override
 	public void create () {
 		batch = new SpriteBatch();
 		img = new Texture("badlogic.jpg");
+		connectSocket();
 	}
 
 	@Override
@@ -27,5 +31,14 @@ public class BattleArena extends ApplicationAdapter {
 	public void dispose () {
 		batch.dispose();
 		img.dispose();
+	}
+
+	private void connectSocket(){
+		try{
+			socket = IO.socket("ws://localhost:3000");
+			socket.connect();
+		}catch (Exception e){
+			System.out.println(e.getMessage());
+		}
 	}
 }
