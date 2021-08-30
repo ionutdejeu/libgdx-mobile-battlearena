@@ -7,6 +7,7 @@ import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.physics.box2d.Body;
@@ -20,12 +21,13 @@ import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.libgdx.battlearena.GUI.Controller;
+import com.libgdx.battlearena.GUI.ControllerActor;
 
 public class GameplayScreen implements Screen {
     public static final float PPM = 100;
     public static SpriteBatch batch;
     World world;
-    float lerp = 0.1f;
+    float lerp = 0.6f;
     OrthographicCamera cam;
     Viewport viewport;
     Box2DDebugRenderer b2dr;
@@ -33,11 +35,16 @@ public class GameplayScreen implements Screen {
     Controller controller;
     private Stage stage;
     private Game game;
+    private ControllerActor ca;
+    private ShapeRenderer shapeRenderer;
 
-   public GameplayScreen(Game g){
-       game = g;
-       stage = new Stage(new ScreenViewport());
-   }
+    public GameplayScreen(Game g) {
+        game = g;
+        stage = new Stage(new ScreenViewport());
+        ca = new ControllerActor("Test");
+        this.stage.addActor(ca);
+        shapeRenderer = new ShapeRenderer();
+    }
 
     @Override
     public void show() {
@@ -58,7 +65,7 @@ public class GameplayScreen implements Screen {
         Gdx.gl.glClearColor(1, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         b2dr.render(world, cam.combined);
-        if(Gdx.app.getType() == Application.ApplicationType.Android)
+        if (Gdx.app.getType() == Application.ApplicationType.Android)
             controller.draw();
     }
 
@@ -67,29 +74,22 @@ public class GameplayScreen implements Screen {
         viewport.update(width, height);
         controller.resize(width, height);
     }
-    public void handleInput(){
-        if(controller.touchStarted()){
-            Vector2 s = controller.speed().nor();
-            System.out.println(s);
-            player.setLinearVelocity(s);
-        }
 
+    public void handleInput() {
+        player.setLinearVelocity(controller.speed());
     }
 
-    public void update(float dt){
+    public void update(float dt) {
         handleInput();
         world.step(dt, 6, 2);
         Vector3 position = cam.position;
         position.x += (player.getPosition().x - position.x) * lerp * dt;
         position.y += (player.getPosition().y - position.y) * lerp * dt;
-        //cam.position.set(viewport.getWorldWidth() / 2, viewport.getWorldHeight() / 2, 0);
-
         cam.update();
     }
 
 
-
-    public void createGround(){
+    public void createGround() {
         BodyDef bdef = new BodyDef();
         bdef.position.set(viewport.getWorldWidth() / 2, 0);
         bdef.type = BodyDef.BodyType.StaticBody;
@@ -102,7 +102,8 @@ public class GameplayScreen implements Screen {
         fdef.shape = shape;
         b2body.createFixture(fdef);
     }
-    public void createPlayer(){
+
+    public void createPlayer() {
         BodyDef bdef = new BodyDef();
         bdef.position.set(viewport.getWorldWidth() / 2, 80 / PPM);
         bdef.type = BodyDef.BodyType.DynamicBody;
