@@ -36,7 +36,7 @@ public class TitleScreen implements Screen {
             @Override
             public void touchUp (InputEvent event, float x, float y, int pointer, int button) {
                 //game.setScreen(new MainMenuScreen(game));
-                game.setScreen(new GameplayScreen(game));
+                game.setScreen(new GameplayScreen3d(game));
             }
             @Override
             public boolean touchDown (InputEvent event, float x, float y, int pointer, int button) {
