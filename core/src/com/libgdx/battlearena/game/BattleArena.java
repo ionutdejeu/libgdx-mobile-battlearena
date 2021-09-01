@@ -24,9 +24,6 @@ import com.libgdx.battlearena.GUI.Controller;
 
 import java.net.URI;
 
-import io.socket.client.IO;
-import io.socket.client.Socket;
-
 
 public class BattleArena extends ApplicationAdapter {
 

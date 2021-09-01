@@ -1,4 +1,4 @@
-package com.libgdx.battlearena.scenes;
+package com.libgdx.battlearena.screens;
 
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;

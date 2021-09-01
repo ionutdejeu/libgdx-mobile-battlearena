@@ -1,4 +1,4 @@
-package com.libgdx.battlearena.scenes;
+package com.libgdx.battlearena.screens;
 
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
@@ -14,35 +14,52 @@ import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.libgdx.battlearena.game.BattleArenaGame;
 
 
-public class OptionScreen implements Screen {
+public class TitleScreen implements Screen {
 
     private Stage stage;
     private Game game;
 
-    public OptionScreen(Game aGame) {
+    public TitleScreen(Game aGame) {
         game = aGame;
         stage = new Stage(new ScreenViewport());
 
-        Label title = new Label("Options Screen", BattleArenaGame.gameSkin,"big-black");
+        Label title = new Label("Title Screen", BattleArenaGame.gameSkin,"big-black");
         title.setAlignment(Align.center);
         title.setY(Gdx.graphics.getHeight()*2/3);
         title.setWidth(Gdx.graphics.getWidth());
         stage.addActor(title);
 
-        TextButton backButton = new TextButton("Go Back",BattleArenaGame.gameSkin);
-        backButton.setWidth(Gdx.graphics.getWidth()/2);
-        backButton.setPosition(Gdx.graphics.getWidth()/2-backButton.getWidth()/2,Gdx.graphics.getHeight()/4-backButton.getHeight()/2);
-        backButton.addListener(new InputListener(){
+        TextButton playButton = new TextButton("Play!",BattleArenaGame.gameSkin);
+        playButton.setWidth(Gdx.graphics.getWidth()/2);
+        playButton.setPosition(Gdx.graphics.getWidth()/2-playButton.getWidth()/2,Gdx.graphics.getHeight()/2-playButton.getHeight()/2);
+        playButton.addListener(new InputListener(){
             @Override
             public void touchUp (InputEvent event, float x, float y, int pointer, int button) {
-                game.setScreen(new TitleScreen(game));
+                //game.setScreen(new MainMenuScreen(game));
+                game.setScreen(new BulletPhysicsScreen(game));
             }
             @Override
             public boolean touchDown (InputEvent event, float x, float y, int pointer, int button) {
                 return true;
             }
         });
-        stage.addActor(backButton);
+        stage.addActor(playButton);
+
+        TextButton optionsButton = new TextButton("Options",BattleArenaGame.gameSkin);
+        optionsButton.setWidth(Gdx.graphics.getWidth()/2);
+        optionsButton.setPosition(Gdx.graphics.getWidth()/2-optionsButton.getWidth()/2,Gdx.graphics.getHeight()/4-optionsButton.getHeight()/2);
+        optionsButton.addListener(new InputListener(){
+            @Override
+            public void touchUp (InputEvent event, float x, float y, int pointer, int button) {
+                game.setScreen(new OptionScreen(game));
+            }
+            @Override
+            public boolean touchDown (InputEvent event, float x, float y, int pointer, int button) {
+                return true;
+            }
+        });
+        stage.addActor(optionsButton);
+
     }
 
     @Override
