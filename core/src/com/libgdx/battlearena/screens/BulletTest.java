@@ -1,9 +1,7 @@
 package com.libgdx.battlearena.screens;
 
 import com.badlogic.gdx.ApplicationListener;
-import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
@@ -42,42 +40,59 @@ import com.badlogic.gdx.physics.bullet.dynamics.btDynamicsWorld;
 import com.badlogic.gdx.physics.bullet.dynamics.btRigidBody;
 import com.badlogic.gdx.physics.bullet.dynamics.btSequentialImpulseConstraintSolver;
 import com.badlogic.gdx.physics.bullet.linearmath.btMotionState;
-import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ArrayMap;
 import com.badlogic.gdx.utils.Disposable;
-import com.badlogic.gdx.utils.viewport.ScreenViewport;
 
-public class BulletDynamicsScreen implements Screen {
-
+/** @see https://xoppa.github.io/blog/using-the-libgdx-3d-physics-bullet-wrapper-part2/
+ * @author Xoppa */
+public class BulletTest implements ApplicationListener {
     final static short GROUND_FLAG = 1 << 8;
     final static short OBJECT_FLAG = 1 << 9;
     final static short ALL_FLAG = -1;
 
     class MyContactListener extends ContactListener {
         @Override
-        public boolean onContactAdded (int userValue0, int partId0, int index0, int userValue1, int partId1, int index1) {
-            if (userValue0 != 0)
+        public boolean onContactAdded (int userValue0, int partId0, int index0, boolean match0, int userValue1, int partId1,
+                                       int index1, boolean match1) {
+            if (match0)
                 ((ColorAttribute)instances.get(userValue0).materials.get(0).get(ColorAttribute.Diffuse)).color.set(Color.WHITE);
-            if (userValue1 != 0)
+            if (match1)
                 ((ColorAttribute)instances.get(userValue1).materials.get(0).get(ColorAttribute.Diffuse)).color.set(Color.WHITE);
             return true;
         }
     }
 
+    static class MyMotionState extends btMotionState {
+        Matrix4 transform;
 
+        @Override
+        public void getWorldTransform (Matrix4 worldTrans) {
+            worldTrans.set(transform);
+        }
+
+        @Override
+        public void setWorldTransform (Matrix4 worldTrans) {
+            transform.set(worldTrans);
+        }
+    }
 
     static class GameObject extends ModelInstance implements Disposable {
         public final btRigidBody body;
+        public final MyMotionState motionState;
 
         public GameObject (Model model, String node, btRigidBody.btRigidBodyConstructionInfo constructionInfo) {
             super(model, node);
+            motionState = new MyMotionState();
+            motionState.transform = transform;
             body = new btRigidBody(constructionInfo);
+            body.setMotionState(motionState);
         }
 
         @Override
         public void dispose () {
             body.dispose();
+            motionState.dispose();
         }
 
         static class Constructor implements Disposable {
@@ -110,8 +125,6 @@ public class BulletDynamicsScreen implements Screen {
         }
     }
 
-    private Game game;
-    private Stage stage;
     PerspectiveCamera cam;
     CameraInputController camController;
     ModelBatch modelBatch;
@@ -128,10 +141,9 @@ public class BulletDynamicsScreen implements Screen {
     btDynamicsWorld dynamicsWorld;
     btConstraintSolver constraintSolver;
 
-    public BulletDynamicsScreen(Game g) {
-        // Create camera sized to screens width/height with Field of View of 75 degrees
-        game = g;
-        stage  = new Stage(new ScreenViewport());
+    @Override
+    public void create () {
+        Bullet.init();
 
         modelBatch = new ModelBatch();
         environment = new Environment();
@@ -189,36 +201,39 @@ public class BulletDynamicsScreen implements Screen {
 
         instances = new Array<GameObject>();
         GameObject object = constructors.get("ground").construct();
+        object.body.setCollisionFlags(object.body.getCollisionFlags() | btCollisionObject.CollisionFlags.CF_KINEMATIC_OBJECT);
         instances.add(object);
-        dynamicsWorld.addRigidBody(object.body, GROUND_FLAG, ALL_FLAG);
+        dynamicsWorld.addRigidBody(object.body);
+        object.body.setContactCallbackFlag(GROUND_FLAG);
+        object.body.setContactCallbackFilter(0);
+        object.body.setActivationState(Collision.DISABLE_DEACTIVATION);
     }
+
     public void spawn () {
         GameObject obj = constructors.values[1 + MathUtils.random(constructors.size - 2)].construct();
         obj.transform.setFromEulerAngles(MathUtils.random(360f), MathUtils.random(360f), MathUtils.random(360f));
         obj.transform.trn(MathUtils.random(-2.5f, 2.5f), 9f, MathUtils.random(-2.5f, 2.5f));
-        obj.body.setWorldTransform(obj.transform);
+        obj.body.proceedToTransform(obj.transform);
         obj.body.setUserValue(instances.size);
         obj.body.setCollisionFlags(obj.body.getCollisionFlags() | btCollisionObject.CollisionFlags.CF_CUSTOM_MATERIAL_CALLBACK);
         instances.add(obj);
-        dynamicsWorld.addRigidBody(obj.body, OBJECT_FLAG, GROUND_FLAG);
-    }
-    @Override
-    public void show() {
-
+        dynamicsWorld.addRigidBody(obj.body);
+        obj.body.setContactCallbackFlag(OBJECT_FLAG);
+        obj.body.setContactCallbackFilter(GROUND_FLAG);
     }
 
+    float angle, speed = 90f;
+
     @Override
-    public void render(float delta) {
-        // You’ve seen all this before, just be sure to clear the GL_DEPTH_BUFFER_BIT when working in 3D
+    public void render () {
+        final float delta = Math.min(1f / 30f, Gdx.graphics.getDeltaTime());
 
-        final float d = Math.min(1f / 30f, Gdx.graphics.getDeltaTime());
+        angle = (angle + delta * speed) % 360f;
+        instances.get(0).transform.setTranslation(0, MathUtils.sinDeg(angle) * 2.5f, 0f);
 
-        dynamicsWorld.stepSimulation(d, 5, 1f / 60f);
+        dynamicsWorld.stepSimulation(delta, 5, 1f / 60f);
 
-        for (GameObject obj : instances)
-            obj.body.getWorldTransform(obj.transform);
-
-        if ((spawnTimer -= d) < 0) {
+        if ((spawnTimer -= delta) < 0) {
             spawn();
             spawnTimer = 1.5f;
         }
@@ -231,33 +246,10 @@ public class BulletDynamicsScreen implements Screen {
         modelBatch.begin(cam);
         modelBatch.render(instances, environment);
         modelBatch.end();
-
-    }
-
-
-    @Override
-    public void resize(int width, int height) {
-
     }
 
     @Override
-    public void pause() {
-
-    }
-
-    @Override
-    public void resume() {
-
-    }
-
-    @Override
-    public void hide() {
-
-    }
-
-    @Override
-    public void dispose() {
-
+    public void dispose () {
         for (GameObject obj : instances)
             obj.dispose();
         instances.clear();
@@ -276,5 +268,17 @@ public class BulletDynamicsScreen implements Screen {
 
         modelBatch.dispose();
         model.dispose();
+    }
+
+    @Override
+    public void pause () {
+    }
+
+    @Override
+    public void resume () {
+    }
+
+    @Override
+    public void resize (int width, int height) {
     }
 }
