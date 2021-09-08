@@ -4,6 +4,7 @@ import com.badlogic.ashley.core.Component;
 import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.PooledEngine;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Quaternion;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
@@ -14,11 +15,11 @@ public class TransformComponent implements Component, Pool.Poolable {
     public final Vector3 scale = new Vector3(1,1,1);
     public Color tint = Color.WHITE.cpy();
     public Quaternion rotation = new Quaternion();
+    public Matrix4 transform = new Matrix4();
     public boolean isHidden = false;
     public Vector2 originOffset = new Vector2(0f, 0f);
-    //public float opacity = 1f;
 
-    TransformComponent(){
+    public TransformComponent(){
 
     }
     public static TransformComponent create(Engine engine){
@@ -28,12 +29,17 @@ public class TransformComponent implements Component, Pool.Poolable {
             return new TransformComponent();
         }
     }
-
+    public TransformComponent setTransform(Matrix4 t){
+        transform = t;
+        return this;
+    }
     public TransformComponent setPosition(float x, float y){
         return setPosition(x, y, this.position.z);
+
     }
     public TransformComponent setPosition(float x, float y, float z){
         this.position.set(x, y, z);
+        this.transform.setFromEulerAngles(x,y,z);
         return this;
     }
 
@@ -45,11 +51,13 @@ public class TransformComponent implements Component, Pool.Poolable {
 
     public TransformComponent setScale(float x, float y,float z){
         this.scale.set(x, y,z);
+        transform.scale(x,y,z);
         return this;
     }
 
     public TransformComponent setRotation(Quaternion rot){
         this.rotation = rot;
+        transform.rotate(rot);
         return this;
     }
 

@@ -1,5 +1,6 @@
 package com.libgdx.battlearena.ecs.systems;
 
+import com.badlogic.ashley.core.ComponentMapper;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.systems.IteratingSystem;
@@ -18,40 +19,48 @@ import com.badlogic.gdx.physics.bullet.dynamics.btDynamicsWorld;
 import com.badlogic.gdx.physics.bullet.dynamics.btRigidBody;
 import com.badlogic.gdx.physics.bullet.dynamics.btSequentialImpulseConstraintSolver;
 import com.badlogic.gdx.utils.Array;
+import com.libgdx.battlearena.ecs.components.ModelComponent;
+import com.libgdx.battlearena.ecs.components.RigidbodyComponent;
+import com.libgdx.battlearena.ecs.components.TransformComponent;
 import com.libgdx.battlearena.screens.BulletDynamicsScreen;
 
-public class GravitySystem extends IteratingSystem {
+public class PhysicsSystem extends IteratingSystem {
+
+
+    private static final float MAX_STEP_TIME = 1/60f;
+    private static float accumulator = 0f;
 
     btDynamicsWorld dynamicsWorld;
-    btConstraintSolver constraintSolver;
-    btCollisionConfiguration collisionConfig;
-    btDispatcher dispatcher;
-    btBroadphaseInterface broadphase;
+
     private Array<Entity> bodiesQueue;
+    private ComponentMapper<RigidbodyComponent> rbc = ComponentMapper.getFor(RigidbodyComponent.class);
+    private ComponentMapper<TransformComponent> tm = ComponentMapper.getFor(TransformComponent.class);
 
 
-    public GravitySystem(Family family) {
-        super(family);
-        collisionConfig = new btDefaultCollisionConfiguration();
-        dispatcher = new btCollisionDispatcher(collisionConfig);
-        broadphase = new btDbvtBroadphase();
-        constraintSolver = new btSequentialImpulseConstraintSolver();
-        dynamicsWorld = new btDiscreteDynamicsWorld(dispatcher, broadphase, constraintSolver, collisionConfig);
-        dynamicsWorld.setGravity(new Vector3(0, -10f, 0));
+
+    public PhysicsSystem(btDynamicsWorld w) {
+        super(Family.all(TransformComponent.class, RigidbodyComponent.class).get());
+        dynamicsWorld = w;
         bodiesQueue = new Array<>();
     }
+
 
     @Override
     public void update(float deltaTime) {
         super.update(deltaTime);
 
+        final float d = Math.min(1f / 30f, deltaTime);
+        dynamicsWorld.stepSimulation(d, 5, 1f / 60f);
 
+        for (Entity e : bodiesQueue) {
+            RigidbodyComponent rb = rbc.get(e);
+            TransformComponent t = tm.get(e);
+            rb.btBody.getWorldTransform(t.transform);
+        }
         bodiesQueue.clear();
     }
     @Override
     protected void processEntity(Entity entity, float deltaTime) {
         bodiesQueue.add(entity);
-
-
     }
 }

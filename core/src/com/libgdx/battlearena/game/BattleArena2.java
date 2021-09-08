@@ -59,7 +59,6 @@ public class BattleArena2 extends ApplicationAdapter {
 	public void handleInput(){
 		if(controller.touchStarted()){
 			Vector2 s = controller.speed().nor();
-			System.out.println(s);
 			player.setLinearVelocity(s);
 		}
 

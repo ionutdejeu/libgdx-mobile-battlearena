@@ -35,16 +35,18 @@ public class RenderingSystem extends IteratingSystem {
 
     ModelBatch modelBatch;
     Environment environment;
-    private Array<ModelInstance> renderQueue;
-    private Comparator<Entity> comparator;
+    private Array<Entity> renderQueue;
     private PerspectiveCamera cam;
+    private ComponentMapper<ModelComponent> modelM;
+    private ComponentMapper<TransformComponent> transformM;
 
     private Color tintPlaceholder = Color.WHITE.cpy();
 
 
     public RenderingSystem(ModelBatch batch, PerspectiveCamera cam) {
         super(Family.all(TransformComponent.class, ModelComponent.class).get());//, new ZComparator())
-
+        modelM = ComponentMapper.getFor(ModelComponent.class);
+        transformM = ComponentMapper.getFor(TransformComponent.class);
         renderQueue = new Array<>();
 
         modelBatch = batch;
@@ -61,19 +63,26 @@ public class RenderingSystem extends IteratingSystem {
         Gdx.gl.glViewport(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         Gdx.gl.glClearColor(1, 1, 1, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
-        cam.rotateAround(Vector3.Zero, new Vector3(0,1,0),1f);
-        cam.update();
+
 
         modelBatch.begin(cam);
-        modelBatch.render(renderQueue, environment);
+        Entity currentEnt;
+        for(int i=0;i<renderQueue.size;i++){
+            currentEnt = renderQueue.get(i);
+            TransformComponent  t= transformM.get(currentEnt);
+            ModelComponent m = modelM.get(currentEnt);
+            m.modelInstance.transform.set(t.transform);
+            modelBatch.render(m.modelInstance, environment);
+        }
+
         modelBatch.end();
         renderQueue.clear();
     }
 
     @Override
     protected void processEntity(Entity entity, float deltaTime) {
-        ModelComponent m = entity.getComponent(ModelComponent.class);
-        renderQueue.add(m.modelInstance);
+
+        renderQueue.add(entity);
     }
 
 

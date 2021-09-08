@@ -16,11 +16,33 @@ import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
+import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.physics.bullet.collision.*;
+import com.badlogic.gdx.physics.bullet.collision.btBroadphaseInterface;
+import com.badlogic.gdx.physics.bullet.collision.btCollisionConfiguration;
+import com.badlogic.gdx.physics.bullet.collision.btCollisionDispatcher;
+import com.badlogic.gdx.physics.bullet.collision.btCollisionShape;
+import com.badlogic.gdx.physics.bullet.collision.btDbvtBroadphase;
+import com.badlogic.gdx.physics.bullet.collision.btDefaultCollisionConfiguration;
+import com.badlogic.gdx.physics.bullet.collision.btDispatcher;
+import com.badlogic.gdx.physics.bullet.dynamics.btConstraintSolver;
+import com.badlogic.gdx.physics.bullet.dynamics.btDiscreteDynamicsWorld;
+import com.badlogic.gdx.physics.bullet.dynamics.btDynamicsWorld;
+import com.badlogic.gdx.physics.bullet.dynamics.btSequentialImpulseConstraintSolver;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.utils.GdxNativesLoader;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.libgdx.battlearena.ecs.components.ModelComponent;
+import com.libgdx.battlearena.ecs.components.OrbitCameraControlComponent;
+import com.libgdx.battlearena.ecs.components.PhysicsObjectFactory;
+import com.libgdx.battlearena.ecs.components.RigidbodyComponent;
+import com.libgdx.battlearena.ecs.components.ScriptComponent;
 import com.libgdx.battlearena.ecs.components.TransformComponent;
+import com.libgdx.battlearena.ecs.systems.PhysicsSystem;
 import com.libgdx.battlearena.ecs.systems.RenderingSystem;
+import com.libgdx.battlearena.ecs.systems.ScriptSystem;
+
+import org.graalvm.compiler.core.common.type.ArithmeticOpTable;
 
 public class ECSTestScreen extends ScreenAdapter {
 
@@ -30,10 +52,20 @@ public class ECSTestScreen extends ScreenAdapter {
     Game game;
     ModelBatch mb;
     PerspectiveCamera cam;
-    Model model;
+
+    btConstraintSolver constraintSolver;
+    btCollisionConfiguration collisionConfig;
+    btDispatcher dispatcher;
+    btBroadphaseInterface broadphase;
+    btDynamicsWorld dynamicsWorld;
+    PhysicsObjectFactory physicsFactory;
     public ECSTestScreen(Game g){
+        GdxNativesLoader.load();
+
         game = g;
         e = new PooledEngine();
+
+
         stage  = new Stage(new ScreenViewport());
 
         cam = new PerspectiveCamera(
@@ -59,9 +91,7 @@ public class ECSTestScreen extends ScreenAdapter {
         RenderingSystem renderingSystem = new RenderingSystem(mb,cam);
         e.addSystem(renderingSystem);
 
-        Entity en = e.createEntity();
-        TransformComponent tc = e.createComponent(TransformComponent.class);
-
+        physicsFactory = new PhysicsObjectFactory();
         ModelBuilder mb = new ModelBuilder();
         Model m = mb.createBox(2f, 2f, 2f,
 
@@ -70,19 +100,40 @@ public class ECSTestScreen extends ScreenAdapter {
                 VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal
 
         );
-
-
-        // A model holds all of the information about an, um, model, such as vertex data and texture info
-        // However, you need an instance to actually render it.  The instance contains all the
-        // positioning information ( and more ).  Remember Model==heavy ModelInstance==Light
         ModelInstance i = new ModelInstance(m, 0, 0, 0);
 
-        ModelComponent mc = e.createComponent(ModelComponent.class);
+        btCollisionShape collisonShape = physicsFactory.createBox(i.transform);
+        collisionConfig = new btDefaultCollisionConfiguration();
+        dispatcher = new btCollisionDispatcher(collisionConfig);
+        broadphase = new btDbvtBroadphase();
+        constraintSolver = new btSequentialImpulseConstraintSolver();
+        dynamicsWorld = new btDiscreteDynamicsWorld(dispatcher, broadphase, constraintSolver, collisionConfig);
+        dynamicsWorld.setGravity(new Vector3(0, -10f, 0));
+        PhysicsSystem ps = new PhysicsSystem(dynamicsWorld);
+        e.addSystem(ps);
+        ScriptSystem ss = new ScriptSystem();
+        e.addSystem(ss);
+
+        Entity en = e.createEntity();
+        TransformComponent tc = new TransformComponent();
+        ModelComponent mc = new ModelComponent();
+        RigidbodyComponent rb = new RigidbodyComponent();
+        OrbitCameraControlComponent orbCam = new OrbitCameraControlComponent();
+        orbCam.setCamera(cam);
+
         mc.modelInstance = i;
+        rb.setRigidBody(physicsFactory.createBox(mc.modelInstance.transform),1,1,mc.modelInstance.transform);
         en.add(tc);
+        dynamicsWorld.addRigidBody(rb.btBody, PhysicsObjectFactory.GROUND_FLAG, PhysicsObjectFactory.ALL_FLAG);
+
         en.add(mc);
+        en.add(rb);
+        en.add(orbCam);
+
         e.addEntity(en);
     }
+
+
 
     @Override
     public void show() {

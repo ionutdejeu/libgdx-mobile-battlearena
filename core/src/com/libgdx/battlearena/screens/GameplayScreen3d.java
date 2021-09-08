@@ -19,6 +19,7 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 
+
 public class GameplayScreen3d implements Screen {
     private Game game;
     private Stage stage;
@@ -63,7 +64,7 @@ public class GameplayScreen3d implements Screen {
 
 
         // A ModelBatch is like a SpriteBatch, just for models.  Use it to batch up geometry for OpenGL
-
+        System.out.println("3d Direct");
         modelBatch = new ModelBatch();
 
 
@@ -113,7 +114,6 @@ public class GameplayScreen3d implements Screen {
         Gdx.gl.glClearColor(1, 1, 1, 1);
 
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
-
 
 
         // For some flavor, lets spin our camera around the Y axis by 1 degree each time render is called

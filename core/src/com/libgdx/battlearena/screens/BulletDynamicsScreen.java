@@ -20,8 +20,6 @@ import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector3;
-import com.badlogic.gdx.physics.bullet.Bullet;
-import com.badlogic.gdx.physics.bullet.collision.Collision;
 import com.badlogic.gdx.physics.bullet.collision.ContactListener;
 import com.badlogic.gdx.physics.bullet.collision.btBoxShape;
 import com.badlogic.gdx.physics.bullet.collision.btBroadphaseInterface;
@@ -146,6 +144,7 @@ public class BulletDynamicsScreen implements Screen {
         cam.update();
 
         camController = new CameraInputController(cam);
+
         Gdx.input.setInputProcessor(camController);
 
         ModelBuilder mb = new ModelBuilder();
