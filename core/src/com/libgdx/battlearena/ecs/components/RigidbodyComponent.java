@@ -14,10 +14,23 @@ import com.badlogic.gdx.utils.Pool;
 public class RigidbodyComponent implements Component, Pool.Poolable, Disposable {
 
     public btRigidBody btBody;
-    private static Vector3 localInertia = new Vector3();
+    private Vector3 localInertia = new Vector3();
 
-    public RigidbodyComponent() {
+    public RigidbodyComponent(btCollisionShape shape,float mass,int identifier,Matrix4 transform) {
+        if (mass > 0f)
+            shape.calculateLocalInertia(mass, localInertia);
+        else
+            localInertia.set(0, 0, 0);
+
+        btRigidBody.btRigidBodyConstructionInfo constructionInfo = new btRigidBody.btRigidBodyConstructionInfo(mass, null, shape, localInertia);
+        setRigidBody(constructionInfo, identifier, transform);
     }
+
+    public RigidbodyComponent(btRigidBody.btRigidBodyConstructionInfo contactInfo, int identifier, Matrix4 transform) {
+        btRigidBody.btRigidBodyConstructionInfo constructionInfo = contactInfo;
+        setRigidBody(constructionInfo, identifier, transform);
+    }
+
 
     public void setRigidBody(btCollisionShape shape, float mass, int identifier, Matrix4 worldTransform) {
         if (mass > 0f)
@@ -38,13 +51,7 @@ public class RigidbodyComponent implements Component, Pool.Poolable, Disposable 
         btBody.setCollisionFlags(btBody.getCollisionFlags() | btCollisionObject.CollisionFlags.CF_CUSTOM_MATERIAL_CALLBACK);
     }
 
-    public static RigidbodyComponent create(Engine engine) {
-        if (engine instanceof PooledEngine) {
-            return ((PooledEngine) engine).createComponent(RigidbodyComponent.class);
-        } else {
-            return new RigidbodyComponent();
-        }
-    }
+
 
 
     @Override

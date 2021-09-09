@@ -10,8 +10,8 @@ public class ModelComponent implements Component, Disposable {
     public Model model;
     public String node;
     public ModelInstance modelInstance;
-    public ModelComponent () {
-
+    public ModelComponent (ModelInstance i) {
+        this.modelInstance = i;
     }
     public void setModel(Model m){
         model = m;

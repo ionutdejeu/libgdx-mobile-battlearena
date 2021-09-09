@@ -30,12 +30,15 @@ public class PhysicsSystem extends IteratingSystem {
     private static final float MAX_STEP_TIME = 1/60f;
     private static float accumulator = 0f;
 
-    btDynamicsWorld dynamicsWorld;
+    private static btDynamicsWorld dynamicsWorld;
 
     private Array<Entity> bodiesQueue;
     private ComponentMapper<RigidbodyComponent> rbc = ComponentMapper.getFor(RigidbodyComponent.class);
     private ComponentMapper<TransformComponent> tm = ComponentMapper.getFor(TransformComponent.class);
 
+    public static btDynamicsWorld worldInstance(){
+        return dynamicsWorld;
+    }
 
 
     public PhysicsSystem(btDynamicsWorld w) {

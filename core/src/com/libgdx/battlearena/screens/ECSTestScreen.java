@@ -100,9 +100,8 @@ public class ECSTestScreen extends ScreenAdapter {
                 VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal
 
         );
-        ModelInstance i = new ModelInstance(m, 0, 0, 0);
+        ModelInstance i = new ModelInstance(m, 0, 10, 0);
 
-        btCollisionShape collisonShape = physicsFactory.createBox(i.transform);
         collisionConfig = new btDefaultCollisionConfiguration();
         dispatcher = new btCollisionDispatcher(collisionConfig);
         broadphase = new btDbvtBroadphase();
@@ -116,12 +115,12 @@ public class ECSTestScreen extends ScreenAdapter {
 
         Entity en = e.createEntity();
         TransformComponent tc = new TransformComponent();
-        ModelComponent mc = new ModelComponent();
-        RigidbodyComponent rb = new RigidbodyComponent();
+        ModelComponent mc = new ModelComponent(i);
+        RigidbodyComponent rb = new RigidbodyComponent(physicsFactory.createBox(mc.modelInstance.transform),1,1,tc.transform);
         OrbitCameraControlComponent orbCam = new OrbitCameraControlComponent();
         orbCam.setCamera(cam);
 
-        mc.modelInstance = i;
+
         rb.setRigidBody(physicsFactory.createBox(mc.modelInstance.transform),1,1,mc.modelInstance.transform);
         en.add(tc);
         dynamicsWorld.addRigidBody(rb.btBody, PhysicsObjectFactory.GROUND_FLAG, PhysicsObjectFactory.ALL_FLAG);
@@ -131,6 +130,10 @@ public class ECSTestScreen extends ScreenAdapter {
         en.add(orbCam);
 
         e.addEntity(en);
+
+        Entity ground = physicsFactory.create("ground");
+        e.addEntity(ground);
+
     }
 
 
