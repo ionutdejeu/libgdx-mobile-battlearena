@@ -9,6 +9,7 @@ import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
+import com.badlogic.gdx.graphics.g3d.utils.shapebuilders.BoxShapeBuilder;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.physics.bullet.collision.btBoxShape;
@@ -44,8 +45,9 @@ public class PhysicsObjectFactory {
         mb = new ModelBuilder();
         mb.begin();
         mb.node().id = "ground";
+
         mb.part("ground", GL20.GL_TRIANGLES, VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal, new Material(ColorAttribute.createDiffuse(Color.RED)))
-                .box(5f, 1f, 5f);
+                .box(50f, 0.5f, 50f);
         mb.node().id = "sphere";
         mb.part("sphere", GL20.GL_TRIANGLES, VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal, new Material(ColorAttribute.createDiffuse(Color.GREEN)))
                 .sphere(1f, 1f, 1f, 10, 10);
@@ -63,7 +65,7 @@ public class PhysicsObjectFactory {
                 new Material(ColorAttribute.createDiffuse(Color.MAGENTA))).cylinder(1f, 2f, 1f, 10);
         model = mb.end();
         constructors = new ArrayMap<String, PhysicsObjectFactory.Constructor>(String.class, PhysicsObjectFactory.Constructor.class);
-        constructors.put("ground", new PhysicsObjectFactory.Constructor(model, "ground", new btBoxShape(new Vector3(2.5f, 0.5f, 2.5f)), 0f));
+        constructors.put("ground", new PhysicsObjectFactory.Constructor(model, "ground", new btBoxShape(new Vector3(50f, 0.5f, 50f)), 0f));
         constructors.put("sphere", new PhysicsObjectFactory.Constructor(model, "sphere", new btSphereShape(0.5f), 1f));
         constructors.put("box", new PhysicsObjectFactory.Constructor(model, "box", new btBoxShape(new Vector3(0.5f, 0.5f, 0.5f)), 1f));
         constructors.put("cone", new PhysicsObjectFactory.Constructor(model, "cone", new btConeShape(0.5f, 2f), 1f));
@@ -76,11 +78,14 @@ public class PhysicsObjectFactory {
         return constructors.get(type).construct();
     }
     static class Constructor implements Disposable {
+
+
         public final Model model;
         public final String node;
         public final btCollisionShape shape;
         public final btRigidBody.btRigidBodyConstructionInfo constructionInfo;
-        private static Vector3 localInertia = new Vector3();
+        private Vector3 localInertia = new Vector3();
+        private Vector3 size = new Vector3();
 
         public Constructor (Model model, String node, btCollisionShape shape, float mass) {
             this.model = model;
@@ -106,6 +111,10 @@ public class PhysicsObjectFactory {
             return e;
         }
 
+
+        public Entity debugEntity(){
+            return null;
+        }
 
 
         @Override
