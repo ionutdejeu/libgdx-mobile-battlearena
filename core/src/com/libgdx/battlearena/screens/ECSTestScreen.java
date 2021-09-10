@@ -17,6 +17,7 @@ import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.physics.bullet.DebugDrawer;
 import com.badlogic.gdx.physics.bullet.collision.*;
 import com.badlogic.gdx.physics.bullet.collision.btBroadphaseInterface;
 import com.badlogic.gdx.physics.bullet.collision.btCollisionConfiguration;
@@ -29,6 +30,7 @@ import com.badlogic.gdx.physics.bullet.dynamics.btConstraintSolver;
 import com.badlogic.gdx.physics.bullet.dynamics.btDiscreteDynamicsWorld;
 import com.badlogic.gdx.physics.bullet.dynamics.btDynamicsWorld;
 import com.badlogic.gdx.physics.bullet.dynamics.btSequentialImpulseConstraintSolver;
+import com.badlogic.gdx.physics.bullet.linearmath.btIDebugDraw;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.GdxNativesLoader;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
@@ -59,6 +61,7 @@ public class ECSTestScreen extends ScreenAdapter {
     btBroadphaseInterface broadphase;
     btDynamicsWorld dynamicsWorld;
     PhysicsObjectFactory physicsFactory;
+    DebugDrawer debugDrawer;
     public ECSTestScreen(Game g){
         GdxNativesLoader.load();
 
@@ -112,6 +115,9 @@ public class ECSTestScreen extends ScreenAdapter {
         e.addSystem(ps);
         ScriptSystem ss = new ScriptSystem();
         e.addSystem(ss);
+        debugDrawer = new DebugDrawer();
+        debugDrawer.setDebugMode(btIDebugDraw.DebugDrawModes.DBG_MAX_DEBUG_DRAW_MODE);
+        dynamicsWorld.setDebugDrawer(debugDrawer);
 
         Entity en = e.createEntity();
         TransformComponent tc = new TransformComponent();
@@ -147,6 +153,9 @@ public class ECSTestScreen extends ScreenAdapter {
     public void render(float deltaChange) {
         float clippedDelta = Math.min(deltaChange, MAX_DELTA);
         e.update(clippedDelta);
+        debugDrawer.begin(cam);
+        dynamicsWorld.debugDrawWorld();
+        debugDrawer.end();
     }
 
     @Override
