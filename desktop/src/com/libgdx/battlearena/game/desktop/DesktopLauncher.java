@@ -10,6 +10,6 @@ import com.libgdx.tests.InverseKinematicsTest;
 public class DesktopLauncher {
 	public static void main (String[] arg) {
 		LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
-		new LwjglApplication(new CharacterTest(), config);
+		new LwjglApplication(new BattleArenaGame(), config);
 	}
 }

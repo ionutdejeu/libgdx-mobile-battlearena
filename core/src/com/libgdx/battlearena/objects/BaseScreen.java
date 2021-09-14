@@ -87,10 +87,7 @@ public class BaseScreen implements Screen, InputProcessor, GestureDetector.Gestu
 
     }
 
-    @Override
-    public void render(float delta) {
 
-    }
 
     @Override
     public void resize (int width, int height) {
@@ -169,7 +166,7 @@ public class BaseScreen implements Screen, InputProcessor, GestureDetector.Gestu
     public DirectionalLight light;
     public ModelBatch shadowBatch;
 
-    public BulletWorld world;
+    public PhysicsWorld world;
     public ObjLoader objLoader = new ObjLoader();
     public ModelBuilder modelBuilder = new ModelBuilder();
     public ModelBatch modelBatch;
@@ -178,8 +175,8 @@ public class BaseScreen implements Screen, InputProcessor, GestureDetector.Gestu
 
     protected final static Vector3 tmpV1 = new Vector3(), tmpV2 = new Vector3();
 
-    public BulletWorld createWorld () {
-        return new BulletWorld();
+    public PhysicsWorld createWorld () {
+        return new PhysicsWorld();
     }
 
 
@@ -234,9 +231,9 @@ public class BaseScreen implements Screen, InputProcessor, GestureDetector.Gestu
         disposables.add(boxModel);
 
         // Add the constructors
-        world.addConstructor("ground", new BulletConstructor(groundModel, 0f)); // mass = 0: static body
-        world.addConstructor("box", new BulletConstructor(boxModel, 1f)); // mass = 1kg: dynamic body
-        world.addConstructor("staticbox", new BulletConstructor(boxModel, 0f)); // mass = 0: static body
+        world.addConstructor("ground", new PhysicsWorldConstructor(groundModel, 0f)); // mass = 0: static body
+        world.addConstructor("box", new PhysicsWorldConstructor(boxModel, 1f)); // mass = 1kg: dynamic body
+        world.addConstructor("staticbox", new PhysicsWorldConstructor(boxModel, 0f)); // mass = 0: static body
     }
 
     @Override
@@ -260,8 +257,8 @@ public class BaseScreen implements Screen, InputProcessor, GestureDetector.Gestu
 
     }
 
-
-    public void render () {
+    @Override
+    public void render (float delta) {
         render(true);
     }
 
@@ -308,18 +305,18 @@ public class BaseScreen implements Screen, InputProcessor, GestureDetector.Gestu
         world.update();
     }
 
-    public BulletEntity shoot (final float x, final float y) {
+    public RigidBodyEntity shoot (final float x, final float y) {
         return shoot(x, y, 30f);
     }
 
-    public BulletEntity shoot (final float x, final float y, final float impulse) {
+    public RigidBodyEntity shoot (final float x, final float y, final float impulse) {
         return shoot("box", x, y, impulse);
     }
 
-    public BulletEntity shoot (final String what, final float x, final float y, final float impulse) {
+    public RigidBodyEntity shoot (final String what, final float x, final float y, final float impulse) {
         // Shoot a box
         Ray ray = camera.getPickRay(x, y);
-        BulletEntity entity = world.add(what, ray.origin.x, ray.origin.y, ray.origin.z);
+        RigidBodyEntity entity = world.add(what, ray.origin.x, ray.origin.y, ray.origin.z);
         entity.setColor(0.5f + 0.5f * (float)Math.random(), 0.5f + 0.5f * (float)Math.random(), 0.5f + 0.5f * (float)Math.random(),
                 1f);
         ((btRigidBody)entity.body).applyCentralImpulse(ray.direction.scl(impulse));

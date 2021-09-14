@@ -1,11 +1,15 @@
 package com.libgdx.battlearena.GUI;
 
+import com.badlogic.ashley.signals.Listener;
+import com.badlogic.ashley.signals.Signal;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.scenes.scene2d.Action;
+import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
@@ -14,7 +18,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
-public class Controller {
+public class Controller extends Actor {
     static float threshold = 0.1f;
     Viewport viewport;
     Stage stage;
@@ -26,7 +30,10 @@ public class Controller {
     private ShapeRenderer shapeRenderer;
     private Vector2 zeroSpeed;
 
+
     public Controller(SpriteBatch b){
+
+
         zeroSpeed = currentPosition = initialTouchPos = new Vector2(0,0);
 
         cam = new OrthographicCamera();

@@ -3,14 +3,19 @@ package com.libgdx.battlearena.objects;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.InputAdapter;
 import com.badlogic.gdx.InputProcessor;
+import com.badlogic.gdx.graphics.Camera;
+import com.badlogic.gdx.graphics.PerspectiveCamera;
+import com.libgdx.battlearena.GUI.Controller;
 
 public class JoyStickCamera implements InputProcessor {
 
     private Game game;
     CameraRigType rigType ;
-    public JoyStickCamera(CameraRigType t, Game g){
-        rigType = t;
-        game = g;
+    Camera camera;
+    Controller controller;
+    public JoyStickCamera(PerspectiveCamera camera, Controller controller){
+        this.camera = camera;
+        this.controller = controller;
     }
 
 
