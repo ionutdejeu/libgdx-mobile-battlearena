@@ -9,6 +9,7 @@ import com.libgdx.battlearena.screens.BulletDynamicsScreen;
 import com.libgdx.battlearena.screens.BulletPhysicsScreen;
 import com.libgdx.battlearena.screens.ECSTestScreen;
 import com.libgdx.battlearena.screens.GameplayScreen3d;
+import com.libgdx.battlearena.screens.ObjectRotationScreen;
 import com.libgdx.battlearena.screens.RigidBodyTestScreen;
 import com.libgdx.battlearena.screens.TitleScreen;
 
@@ -19,8 +20,8 @@ public class BattleArenaGame extends Game {
         //GdxNativesLoader.load();
         Bullet.init();
         gameSkin = new Skin(Gdx.files.internal("skin/glassy-ui.json"));
-        RigidBodyTestScreen main_screen = new RigidBodyTestScreen();
-        main_screen.create();
+        ObjectRotationScreen main_screen = new ObjectRotationScreen(this);
+        //main_screen.create();
         this.setScreen(main_screen);
     }
 

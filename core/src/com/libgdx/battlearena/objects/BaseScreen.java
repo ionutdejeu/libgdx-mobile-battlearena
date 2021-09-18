@@ -20,9 +20,13 @@ import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
 import com.badlogic.gdx.graphics.g3d.environment.DirectionalShadowLight;
 import com.badlogic.gdx.graphics.g3d.loader.ObjLoader;
 import com.badlogic.gdx.graphics.g3d.utils.DepthShaderProvider;
+import com.badlogic.gdx.graphics.g3d.utils.MeshBuilder;
+import com.badlogic.gdx.graphics.g3d.utils.MeshPartBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
+import com.badlogic.gdx.graphics.g3d.utils.shapebuilders.ConeShapeBuilder;
 import com.badlogic.gdx.input.GestureDetector;
 import com.badlogic.gdx.math.FloatCounter;
+import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.Ray;
@@ -36,6 +40,7 @@ import com.badlogic.gdx.utils.PerformanceCounter;
 import com.libgdx.tests.BulletConstructor;
 import com.libgdx.tests.BulletEntity;
 import com.libgdx.tests.BulletWorld;
+
 
 public class BaseScreen implements Screen, InputProcessor, GestureDetector.GestureListener {
     public StringBuilder performance = new StringBuilder();
@@ -170,6 +175,8 @@ public class BaseScreen implements Screen, InputProcessor, GestureDetector.Gestu
     public ObjLoader objLoader = new ObjLoader();
     public ModelBuilder modelBuilder = new ModelBuilder();
     public ModelBatch modelBatch;
+    public MeshPartBuilder meshPartBuilder;
+    Model transformGizo;
     public Array<Disposable> disposables = new Array<Disposable>();
     private int debugMode = btIDebugDraw.DebugDrawModes.DBG_NoDebug;
 
@@ -229,11 +236,28 @@ public class BaseScreen implements Screen, InputProcessor, GestureDetector.Gestu
         final Model boxModel = modelBuilder.createBox(1f, 1f, 1f, new Material(ColorAttribute.createDiffuse(Color.WHITE),
                 ColorAttribute.createSpecular(Color.WHITE), FloatAttribute.createShininess(64f)), VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal);
         disposables.add(boxModel);
+        modelBuilder.begin();
+        meshPartBuilder = modelBuilder.part("lineX",1,3, new Material(ColorAttribute.createDiffuse(Color.WHITE)));
+        meshPartBuilder.setColor(Color.RED);
+        meshPartBuilder.line(0,0,0,2,0,0);
+        meshPartBuilder.setColor(Color.BLUE);
+        meshPartBuilder.line(0,0,0,0,2,0);
+        meshPartBuilder.setColor(Color.GREEN);
+        meshPartBuilder.line(0,0,0,0,0,2);
+        transformGizo = modelBuilder.end();
 
         // Add the constructors
         world.addConstructor("ground", new PhysicsWorldConstructor(groundModel, 0f)); // mass = 0: static body
         world.addConstructor("box", new PhysicsWorldConstructor(boxModel, 1f)); // mass = 1kg: dynamic body
         world.addConstructor("staticbox", new PhysicsWorldConstructor(boxModel, 0f)); // mass = 0: static body
+        world.addConstructor("transformGizmo", new PhysicsWorldConstructor(transformGizo, 0f)); // mass = 0: static body
+
+    }
+
+    public BaseEntity createGizmo(){
+        Matrix4 trn = new Matrix4();
+        BaseEntity e = new GizmoEntity(this.transformGizo,trn);
+        return e;
     }
 
     @Override

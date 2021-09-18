@@ -3,6 +3,7 @@ package com.libgdx.battlearena.GUI;
 import com.badlogic.ashley.signals.Listener;
 import com.badlogic.ashley.signals.Signal;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -32,6 +33,13 @@ public class Controller extends Actor {
 
 
     public Controller(SpriteBatch b){
+        InputMultiplexer m = new InputMultiplexer();
+        init(b,m);
+    }
+    public Controller(SpriteBatch b, InputMultiplexer m){
+        init(b,m);
+    }
+    private void init(SpriteBatch b, InputMultiplexer m){
 
 
         zeroSpeed = currentPosition = initialTouchPos = new Vector2(0,0);
@@ -40,7 +48,7 @@ public class Controller extends Actor {
         viewport = new FitViewport(800, 480, cam);
         stage = new Stage(viewport, b);
 
-        Gdx.input.setInputProcessor(stage);
+        m.addProcessor(stage);
 
         Table table = new Table();
         table.left().bottom();
