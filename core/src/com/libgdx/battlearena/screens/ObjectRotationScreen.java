@@ -65,6 +65,13 @@ public class ObjectRotationScreen implements Screen {
     ModelInstance gizmo;
     ModelInstance ball;
 
+    public Vector3 velocity = new Vector3();
+    public Vector3 acceleration = new Vector3();
+    public Vector3 position = new Vector3();
+    public Quaternion rotation = new Quaternion();
+    Quaternion tempQ = new Quaternion();
+    Vector3 tempV = new Vector3();
+
     public ObjectRotationScreen(Game g) {
         // Create camera sized to screens width/height with Field of View of 75 degrees
         game = g;
@@ -120,10 +127,7 @@ public class ObjectRotationScreen implements Screen {
         Gdx.gl.glClearColor(0.3f, 0.3f, 0.3f, 1.f);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
         Matrix4 trn = gizmo.transform;
-        trn.rotate(Vector3.Y,10*delta);
-        modelBatch.begin(cam);
-        modelBatch.render(models, environment);
-        modelBatch.end();
+        rotation.setFromAxis(Vector3.Y,10*delta);
         joystickController.draw();
         if(true){
             //System.out.println("Touch Started");
@@ -132,16 +136,20 @@ public class ObjectRotationScreen implements Screen {
             //Vector3 s3 = new Vector3(0,0,0);
             //Vector3 s3trn = s3.cpy().rot(trn);
             //System.out.println(s3trn);
-            Vector3 playerForward = Vector3.X.rot(trn);
+            Vector3 playerForward = Vector3.X.mul(rotation);
             System.out.println(playerForward);
             Quaternion q = new Quaternion();
-            ball.transform.setToTranslation(playerForward.cpy().nor());
-            //q.set(Vector3.Y,)
 
+            ball.transform.set(playerForward,tempQ);
+            //q.set(Vector3.Y,)
+            gizmo.transform.rotate(rotation);
             //s3trn.y= 0;
             //trn.rotate(q);
             //trn.rotateTowardDirection(s3trn,Vector3.Y);
         }
+        modelBatch.begin(cam);
+        modelBatch.render(models, environment);
+        modelBatch.end();
 
     }
 

@@ -98,11 +98,10 @@ public class Basic3DTest extends GdxTest {
         modelBuilder.node().id = "floor";
         modelBuilder.part("floor", GL20.GL_TRIANGLES, Usage.Position | Usage.Normal, new Material("diffuseGreen", ColorAttribute.createDiffuse(Color.GREEN)))
                 .box(100f, 1f, 100f);
-        Texture texture = new Texture(Gdx.files.internal("assets/badlogic.jpg"));
-        modelBuilder.manage(texture);
+
         modelBuilder.node().id = "ball";
-        modelBuilder.part("ball", GL20.GL_TRIANGLES, Usage.Position | Usage.Normal | Usage.TextureCoordinates,
-                new Material("diffuseRed", TextureAttribute.createDiffuse(texture)))
+        modelBuilder.part("ball", GL20.GL_TRIANGLES, Usage.Position | Usage.Normal ,
+                new Material(ColorAttribute.createDiffuse(Color.WHITE)))
                 .sphere(1f, 1f, 1f, 10, 10);
         model = modelBuilder.end();
 

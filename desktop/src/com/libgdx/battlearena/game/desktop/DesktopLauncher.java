@@ -13,6 +13,6 @@ public class DesktopLauncher {
 		LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
 		config.width=1920;
 		config.height=1080;
-		new LwjglApplication(new Basic3DTest(), config);
+		new LwjglApplication(new BattleArenaGame(), config);
 	}
 }
