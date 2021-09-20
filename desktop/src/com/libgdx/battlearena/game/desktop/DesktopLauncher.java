@@ -4,6 +4,7 @@ import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
 import com.libgdx.battlearena.game.BattleArena;
 import com.libgdx.battlearena.game.BattleArenaGame;
+import com.libgdx.tests.Basic3DTest;
 import com.libgdx.tests.CharacterTest;
 import com.libgdx.tests.InverseKinematicsTest;
 
@@ -12,6 +13,6 @@ public class DesktopLauncher {
 		LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
 		config.width=1920;
 		config.height=1080;
-		new LwjglApplication(new BattleArenaGame(), config);
+		new LwjglApplication(new Basic3DTest(), config);
 	}
 }

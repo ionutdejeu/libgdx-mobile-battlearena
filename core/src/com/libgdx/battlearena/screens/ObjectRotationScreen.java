@@ -19,6 +19,9 @@ import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
 import com.badlogic.gdx.graphics.g3d.utils.CameraInputController;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Matrix4;
+import com.badlogic.gdx.math.Quaternion;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.physics.bullet.Bullet;
 import com.badlogic.gdx.physics.bullet.collision.ContactListener;
@@ -46,6 +49,7 @@ import com.libgdx.battlearena.GUI.Controller;
 import com.libgdx.battlearena.objects.BaseScreen;
 import com.libgdx.battlearena.utils.UsefulMeshs;
 
+
 public class ObjectRotationScreen implements Screen {
 
     private Game game;
@@ -58,6 +62,8 @@ public class ObjectRotationScreen implements Screen {
     Environment environment;
     Controller joystickController;
     Array<ModelInstance> models;
+    ModelInstance gizmo;
+    ModelInstance ball;
 
     public ObjectRotationScreen(Game g) {
         // Create camera sized to screens width/height with Field of View of 75 degrees
@@ -87,9 +93,14 @@ public class ObjectRotationScreen implements Screen {
         models = new Array<>();
         Material planeMaterial = new Material(ColorAttribute.createDiffuse(Color.WHITE));
         Model axes = UsefulMeshs.createAxes();
+        Model transfomrGizmo = UsefulMeshs.transformGizmo();
         models.add(new ModelInstance(axes));
+        gizmo = new ModelInstance(transfomrGizmo);
+        ball = new ModelInstance(UsefulMeshs.ball());
+        models.add(gizmo);
+        models.add(ball);
+        gizmo.transform.translate(new Vector3(1,1,1));
         Gdx.input.setInputProcessor(m);
-
 
 
     }
@@ -108,13 +119,28 @@ public class ObjectRotationScreen implements Screen {
 
         Gdx.gl.glClearColor(0.3f, 0.3f, 0.3f, 1.f);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
-
+        Matrix4 trn = gizmo.transform;
+        trn.rotate(Vector3.Y,10*delta);
         modelBatch.begin(cam);
         modelBatch.render(models, environment);
         modelBatch.end();
         joystickController.draw();
-        if(joystickController.touchStarted()){
-            System.out.println("Touch Started");
+        if(true){
+            //System.out.println("Touch Started");
+            Vector2 s = joystickController.speed().nor();
+            Vector3 characterPos= trn.getTranslation(new Vector3());
+            //Vector3 s3 = new Vector3(0,0,0);
+            //Vector3 s3trn = s3.cpy().rot(trn);
+            //System.out.println(s3trn);
+            Vector3 playerForward = Vector3.X.rot(trn);
+            System.out.println(playerForward);
+            Quaternion q = new Quaternion();
+            ball.transform.setToTranslation(playerForward.cpy().nor());
+            //q.set(Vector3.Y,)
+
+            //s3trn.y= 0;
+            //trn.rotate(q);
+            //trn.rotateTowardDirection(s3trn,Vector3.Y);
         }
 
     }

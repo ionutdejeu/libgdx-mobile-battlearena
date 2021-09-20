@@ -20,11 +20,17 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.VertexAttributes.Usage;
 import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.Model;
+import com.badlogic.gdx.graphics.g3d.ModelInstance;
+import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.model.Node;
 import com.badlogic.gdx.graphics.g3d.utils.MeshPartBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.shapebuilders.BoxShapeBuilder;
+import com.badlogic.gdx.graphics.g3d.utils.shapebuilders.ConeShapeBuilder;
+import com.badlogic.gdx.graphics.g3d.utils.shapebuilders.SphereShapeBuilder;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
+
 
 /**
  * @author Marcus Brummer
@@ -68,6 +74,59 @@ public class UsefulMeshs {
         return modelBuilder.end();
     }
 
+    public static Model createTransformGismo(){
+        ModelBuilder modelBuilder = new ModelBuilder();
+        MeshPartBuilder meshPartBuilder = modelBuilder.part("lineX",1,3, new Material(ColorAttribute.createDiffuse(Color.WHITE)));
+        meshPartBuilder.setColor(Color.RED);
+        meshPartBuilder.line(0,0,0,2,0,0);
+        meshPartBuilder.setColor(Color.BLUE);
+        meshPartBuilder.line(0,0,0,0,2,0);
+        meshPartBuilder.setColor(Color.GREEN);
+        meshPartBuilder.line(0,0,0,0,0,2);
+        return modelBuilder.end();
+    }
+    public static Model ball(){
+        ModelBuilder modelBuilder = new ModelBuilder();
+        modelBuilder.begin();
+        MeshPartBuilder meshPartBuilder = modelBuilder.part("lineX",1,3, new Material(ColorAttribute.createDiffuse(Color.WHITE)));
+        meshPartBuilder.setColor(Color.RED);
+        SphereShapeBuilder.build(meshPartBuilder,0.5f,0.5f,0.5f,10,10);
+        return modelBuilder.end();
+    }
+    public static Model transformGizmo(){
+        ModelBuilder mb = new ModelBuilder();
+        mb.begin();
+        // line
+        Vector3[] axes = new Vector3[]{
+                new Vector3(1,0,0),
+                new Vector3(0,1,0),
+                new Vector3(0,0,1)
+        };
+
+
+        for (Vector3 to:axes){
+            Vector3 colorVector = to.cpy().scl(255);
+            Node arrowBody = mb.node();
+            arrowBody.translation.set(new Vector3());
+            MeshPartBuilder meshBuilder = mb.part("line", GL20.GL_LINES,
+                    Usage.Position | Usage.ColorUnpacked, new Material(ColorAttribute.createDiffuse(Color.WHITE)));
+            meshBuilder.setColor(colorVector.x,colorVector.y,colorVector.z,1f);
+            meshBuilder.line(0,0, 0, 2*to.x, 2*to.y, 2*to.z);
+
+            // stub
+            Node node = mb.node();
+            node.translation.set(to.cpy().scl(2));
+
+
+            //node.rotation.setEulerAngles();
+            meshBuilder = mb.part("stub", GL20.GL_TRIANGLES, Usage.Position | Usage.Normal,new Material(ColorAttribute.createDiffuse(Color.WHITE)));
+            meshBuilder.setColor(colorVector.x,colorVector.y,colorVector.z,1f);
+            ConeShapeBuilder.build(meshBuilder,.5f,.5f,.5f,4);
+        }
+        return mb.end();
+
+
+    }
     public static Model createArrowStub(Material mat, Vector3 from, Vector3 to) {
         ModelBuilder modelBuilder = new ModelBuilder();
         modelBuilder.begin();
